@@ -52,6 +52,8 @@ def get_query_item(parsed_qa: dict[int, dict[str, Any]], query: str) -> dict[str
     """
     log = Logger()
 
+    query += ":"
+
     current: str = ""
     l: int = 0
     loc: list[int] = []
@@ -73,9 +75,41 @@ def get_query_item(parsed_qa: dict[int, dict[str, Any]], query: str) -> dict[str
         case 1:
             return parsed_qa[loc[0]]
         case 2:
-            return parsed_qa[loc[0]]["answers"][loc[1]]
+            if parsed_qa[loc[0]]["type"] == "q":
+                return parsed_qa[loc[0] - 1]["answers"][loc[1] - 1]
+            else:
+                log.log_message("Attempted to get an answer from a title, returning title. From function get_query_item in qanotz_core.")
+                return parsed_qa[loc[0]]
         case 3:
-            return parsed_qa[loc[0]]["answers"][loc[1]]["metadata"][loc[2]]
+            if parsed_qa[loc[0]]["type"] == "q":
+                return parsed_qa[loc[0]]["answers"][loc[1] - 1]["metadata"][loc[2]]
+            else:
+                log.log_message("Attempted to get an answer from a title, returning title. From function get_query_item in qanotz_core.")
+                return parsed_qa[loc[0]]
         case _:
             log.log_message("len(loc) is either empty or has more than three values. This is a MAJOR UNHANDLED ERROR; Please report to GitHub. From function get_query_item in qanotz_core.")
             return parsed_qa[loc[0]]
+        
+if __name__ == "__main__":
+    from qanotz_core.parser.qan_parser import parse
+
+    sample_text = """
+    {t Common Questions}
+    {q 1 How do I center a div?
+        {a 1 CSS display and justify
+            {d c Set 'display' to 'flex' and 'justify-content' to 'center'}
+            {d h 1}}
+        {a 2 CSS grid
+            {d c Set 'display' to 'grid' and 'place-items' to 'center'}
+            {d h 0.8}}}
+
+    {q 2 How do I write a print statement in JavaScript?
+        {a 1 CSS display and justify
+            {d c 'message' must be a string or can be converted into one}
+            {d c Don't forget a semicolon (;)}
+            {d h 1}}
+        {a 2 CSS grid
+            {d c Set 'display' to 'grid' and 'place-items' to 'center'}
+            {d h 0.8}}}"""
+    data = parse(sample_text, include_types="tqa")
+    print(get_query_item(data, "2:1"))
