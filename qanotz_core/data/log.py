@@ -19,6 +19,10 @@ class Logger(DataManagerInstance):
         self.file.append("\n" + msg)
         print(self.file.read())
 
+    def get_last_n_messages(self, n: int) -> list[str]:
+        lines = self.file.read().splitlines()
+        return lines[-n:]
+
 if __name__ == "__main__":
     log = Logger()
     print(f"Log file is located at: {log.file.path}")

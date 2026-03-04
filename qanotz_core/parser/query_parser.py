@@ -23,6 +23,8 @@ def get_query_index(parsed_qa: dict[int, dict[str, Any]], query: str) -> list[in
     """
     log = Logger()
 
+    query += ":"
+
     current: str = ""
     l: int = 0
     loc: list[int] = []
