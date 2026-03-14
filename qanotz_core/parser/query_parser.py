@@ -8,8 +8,6 @@ You may obtain a copy of the License at
     http://www.apache.org/licenses/LICENSE-2.0
 """
 
-# DO NOT REMOVE UNTIL FINISHED WITH THE MODULE
-#from qanotz_core.parser.qan_parser import parse
 from qanotz_core.data.log import Logger
 from typing import Any
 

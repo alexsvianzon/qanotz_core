@@ -202,7 +202,7 @@ def format_parsed_qafile(qafile_contents: dict[int, dict[str, Any]]) -> str:
     # keys aren’t used, so loop over the values directly
     for item in qafile_contents.values():
         if item["type"] == "title":
-            parsed += str(item["body"]) + "\n"
+            parsed = str(item["body"]) + "\n\n" + parsed
         elif item["type"] == "question":
             parsed += str(item["body"]) + "\n\n"
 
@@ -233,6 +233,7 @@ def parse(text: str, lookup_mode: bool = False, include_types: str = "tqad") -> 
     return parsed
 
 if __name__ == "__main__":
+    # testing simple example
     sample_text = """
     {t Common Questions}
     {q 1 How do I center a div?
@@ -253,7 +254,31 @@ if __name__ == "__main__":
             {d h 0.8}}}"""
     print(parse(sample_text, include_types="tqa"))
 
-    print("\n\n---\n\n")
+    print("---\n")
+
+    # testing title in location other than first spot
+    sample_text = """
+    {q 1 How do I center a div?
+        {a 1 CSS display and justify
+            {d c Set 'display' to 'flex' and 'justify-content' to 'center'}
+            {d h 1}}
+        {a 2 CSS grid
+            {d c Set 'display' to 'grid' and 'place-items' to 'center'}
+            {d h 0.8}}}
+
+    {t Common Questions}
+
+    {q 2 How do I write a print statement in JavaScript?
+        {a 1 CSS display and justify
+            {d c 'message' must be a string or can be converted into one}
+            {d c Don't forget a semicolon (;)}
+            {d h 1}}
+        {a 2 CSS grid
+            {d c Set 'display' to 'grid' and 'place-items' to 'center'}
+            {d h 0.8}}}"""
+    print(format_parsed_qafile(parse(sample_text, include_types="tqa")))
+
+    print("---\n")
 
     # example dbl file
     sample_text = """
