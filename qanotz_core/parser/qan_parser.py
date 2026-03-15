@@ -45,8 +45,6 @@ def _parse_tokens(tokens: list[str], lookup_mode: bool = False, include_types: s
 
             if char == "f":
                 result[item] = {}
-                result[item]["type"] = "file"
-                
                 char_index += 2
 
                 body: str = ""
@@ -212,11 +210,11 @@ if __name__ == "__main__":
         {a CSS grid
             {d c Set 'display' to 'grid' and 'place-items' to 'center'}
             {d h 0.8}}}"""
-    print(parse(sample_text, include_types="tqa"))
+    print(parse(sample_text))
 
     print("---\n")
 
-    # testing title in location other than first spot
+    # testing title in location other than first spot, don't include metadata
     sample_text = """
     {q How do I center a div?
         {a CSS display and justify
