@@ -46,22 +46,8 @@ def _parse_tokens(tokens: list[str], lookup_mode: bool = False, include_types: s
             if char == "f":
                 result[item] = {}
                 result[item]["type"] = "file"
-
-                char_index += 2
-                char = token[char_index]
-                id = ""
-                while token[char_index] != " ":
-                    char = token[char_index]
-                    id += char
-
-                    char_index += 1
-
-                if id.isdigit():
-                    result[item]["id"] = int(id)
-                else:
-                        raise ValueError(f"Expected file ID at token: {token}")
                 
-                char_index += 1
+                char_index += 2
 
                 body: str = ""
                 while char_index < len(token):
@@ -76,7 +62,7 @@ def _parse_tokens(tokens: list[str], lookup_mode: bool = False, include_types: s
 
                 char_index += 2
                 char = token[char_index]
-                if char in "lm": # l for label, m for modified last
+                if char in "lm": # l for label, m for last modified
                     result[item - 1]["metadata"][num_metadata]["id"] = char
                     char_index += 1
                 else:
@@ -109,20 +95,6 @@ def _parse_tokens(tokens: list[str], lookup_mode: bool = False, include_types: s
             result[item]["type"] = "question"
 
             char_index += 2
-            char = token[char_index]
-            id = ""
-            while token[char_index] != " ":
-                char = token[char_index]
-                id += char
-
-                char_index += 1
-
-            if id.isdigit():
-                result[item]["id"] = int(id)
-            else:
-                    raise ValueError(f"Expected question ID at token: {token}")
-            
-            char_index += 1
 
             body: str = ""
             while char_index < len(token):
@@ -136,20 +108,6 @@ def _parse_tokens(tokens: list[str], lookup_mode: bool = False, include_types: s
             result[item - 1]["answers"][num_answers] = {}
 
             char_index += 2
-            char = token[char_index]
-            id = ""
-            while token[char_index] != " ":
-                char = token[char_index]
-                id += char
-
-                char_index += 1
-
-            if id.isdigit():
-                result[item - 1]["answers"][num_answers]["id"] = int(id)
-            else:
-                raise ValueError(f"Expected answer ID at token: {token}")
-            
-            char_index += 1
 
             body: str = ""
             while char_index < len(token):
@@ -206,8 +164,10 @@ def format_parsed_qafile(qafile_contents: dict[int, dict[str, Any]]) -> str:
         elif item["type"] == "question":
             parsed += str(item["body"]) + "\n\n"
 
+            i: int = 0
             for answer in item.get("answers", {}).values():
-                parsed += f"{answer['id']}. {answer['body']}\n"
+                i += 1
+                parsed += f"{i}. {answer['body']}\n"
 
                 for metadata in answer["metadata"].values():
                     match metadata["id"]:
@@ -236,20 +196,20 @@ if __name__ == "__main__":
     # testing simple example
     sample_text = """
     {t Common Questions}
-    {q 1 How do I center a div?
-        {a 1 CSS display and justify
+    {q How do I center a div?
+        {a CSS display and justify
             {d c Set 'display' to 'flex' and 'justify-content' to 'center'}
             {d h 1}}
-        {a 2 CSS grid
+        {a CSS grid
             {d c Set 'display' to 'grid' and 'place-items' to 'center'}
             {d h 0.8}}}
 
-    {q 2 How do I write a print statement in JavaScript?
-        {a 1 CSS display and justify
+    {q How do I write a print statement in JavaScript?
+        {a CSS display and justify
             {d c 'message' must be a string or can be converted into one}
             {d c Don't forget a semicolon (;)}
             {d h 1}}
-        {a 2 CSS grid
+        {a CSS grid
             {d c Set 'display' to 'grid' and 'place-items' to 'center'}
             {d h 0.8}}}"""
     print(parse(sample_text, include_types="tqa"))
@@ -258,22 +218,22 @@ if __name__ == "__main__":
 
     # testing title in location other than first spot
     sample_text = """
-    {q 1 How do I center a div?
-        {a 1 CSS display and justify
+    {q How do I center a div?
+        {a CSS display and justify
             {d c Set 'display' to 'flex' and 'justify-content' to 'center'}
             {d h 1}}
-        {a 2 CSS grid
+        {a CSS grid
             {d c Set 'display' to 'grid' and 'place-items' to 'center'}
             {d h 0.8}}}
 
     {t Common Questions}
 
-    {q 2 How do I write a print statement in JavaScript?
-        {a 1 CSS display and justify
+    {q How do I write a print statement in JavaScript?
+        {a CSS display and justify
             {d c 'message' must be a string or can be converted into one}
             {d c Don't forget a semicolon (;)}
             {d h 1}}
-        {a 2 CSS grid
+        {a CSS grid
             {d c Set 'display' to 'grid' and 'place-items' to 'center'}
             {d h 0.8}}}"""
     print(format_parsed_qafile(parse(sample_text, include_types="tqa")))
@@ -282,10 +242,10 @@ if __name__ == "__main__":
 
     # example dbl file
     sample_text = """
-    {f 1 /home/codespaces/.config/qanotz/qafiles/1.qan
+    {f /home/codespaces/.config/qanotz/qafiles/1.qan
         {m l Common Questions}
         {m m 2/20/2026 2:20 PM}}
-    {f 2 /home/codespaces/.config/qanotz/qafiles/2.qan
+    {f /home/codespaces/.config/qanotz/qafiles/2.qan
         {m l CSS Issues}
         {m m 2/20/2026 2:22 PM}}}
     """
